@@ -36,14 +36,14 @@ def logger(data):
 
 def dorks():
     """Main function for handling Google Dorking."""
-    global log_file  # Ensure log_file is accessible globally
+    global log_file
     try:
         dork = input(f"{Colors.BLUE}\n[+] Enter The Dork Search Query: {Colors.RESET}")
         
         user_choice = input(f"{Colors.BLUE}[+] Enter Total Number of Results You Want (or type 'all' to fetch everything): {Colors.RESET}").strip().lower()
         
         if user_choice == "all":
-            total_results = float("inf")  # Fetch until no more results
+            total_results = float("inf")
         else:
             try:
                 total_results = int(user_choice)
@@ -64,24 +64,16 @@ def dorks():
         print(f"\n{Colors.GREEN}[INFO] Searching... Please wait...{Colors.RESET}\n")
         
         fetched = 0
-        start = 0
-        while fetched < total_results:
-            remaining = min(100, total_results - fetched) if total_results != float("inf") else 100  # Fetch in batches of 100
-            urls_found = False
+        
+        for result in search(dork):
+            if fetched >= total_results:
+                break
+            print(f"{Colors.YELLOW}[+] {Colors.RESET}{result}")
             
-            for result in search(dork, num=remaining, start=start):
-                urls_found = True
-                print(f"{Colors.YELLOW}[+] {Colors.RESET}{result}")
-                
-                if save_output == "y":
-                    logger(result)  # Save only the raw URL without numbering
-                
-                fetched += 1
+            if save_output == "y":
+                logger(result)
             
-            if not urls_found:
-                break  # Stop if no more results are returned
-            
-            start += 100  # Move to the next batch
+            fetched += 1
         
     except KeyboardInterrupt:
         print(f"\n{Colors.RED}[!] User Interruption Detected! Exiting...{Colors.RESET}\n")
